@@ -1,73 +1,97 @@
+# 📊 Employee Sentiment Analysis — LLM & NLP Pipeline
 
-# Employee Sentiment Analysis – Final LLM Assessment (CSV Dataset Included)
-
-This project analyzes employee email data to:
-- Label sentiment (Positive, Neutral, Negative) using **TextBlob**
-- Perform **EDA** and data visualizations
-- Compute **monthly sentiment scores**
-- Produce **employee rankings**
-- Identify **flight risk employees**
-- Fit a **linear regression model** on sentiment trends over time
-
-The dataset (`data/employee_feedback.csv`) is already included and contains:
-- `Subject`: email subject line
-- `body`: email content (used as feedback text)
-- `date`: date of the email
-- `from`: sender address (used as employee ID)
+An end-to-end NLP pipeline that analyzes employee email feedback to detect sentiment, rank employees, identify flight risks, and model sentiment trends over time using TextBlob and Scikit-learn.
 
 ---
 
-## 1. Project Structure
+## ✨ What This Project Does
 
-```text
-.
-├─ data/
-│   └─ employee_feedback.csv         # already included
-├─ notebooks/
-│   └─ employee_sentiment_analysis.ipynb
-├─ src/
-│   └─ sentiment_pipeline.py
-├─ outputs/                          # generated when you run the code
-├─ .env.example
-├─ requirements.txt
-└─ README.md
+- 🏷️ **Sentiment Labelling** — TextBlob polarity scoring maps each feedback to Positive / Neutral / Negative
+- 📈 **Monthly Sentiment Scoring** — Aggregates average sentiment over time with a line chart
+- 🏆 **Employee Ranking** — Ranks all employees by their average sentiment score
+- ⚠️ **Flight Risk Detection** — Rule-based heuristic flags high-risk employees (avg sentiment ≤ -0.1 with ≥ 3 feedbacks)
+- 📉 **Linear Regression Trend** — Fits a trend line over monthly sentiment to detect improving or declining patterns
+- 🔍 **EDA & Visualizations** — Text length distributions, feedback counts per year, sentiment distribution charts
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Language | Python 3.9+ |
+| Sentiment Engine | TextBlob |
+| Data Processing | Pandas, NumPy |
+| ML / Trend Model | Scikit-learn (LinearRegression) |
+| Visualizations | Matplotlib, Seaborn |
+| Notebook | Jupyter |
+| Config | python-dotenv |
+
+---
+
+## 📁 Project Structure
+```
+sentiment-analysis-LLM/
+├── data/
+│   └── employee_feedback.csv       # Email dataset (included)
+├── notebooks/
+│   └── employee_sentiment_analysis.ipynb  # Full interactive pipeline
+├── src/
+│   └── sentiment_pipeline.py       # Standalone Python script
+├── outputs/                        # Generated on run
+│   ├── feedback_with_sentiment.csv
+│   ├── employee_ranking_and_flight_risk.csv
+│   └── monthly_sentiment_trend.csv
+├── .env.example
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-## 2. Setup Instructions
+## 📂 Dataset
 
-1. **Install Python 3.9+** (if not already installed).
+The dataset `data/employee_feedback.csv` contains employee email data with these columns:
 
-2. **Unzip the project** somewhere on your computer, then open a terminal / command prompt
-   in the unzipped folder, e.g. `employee-sentiment-llm-final-csv`.
+| Column | Used As | Description |
+|---|---|---|
+| `from` | `employee_id` | Sender email (employee identifier) |
+| `body` | `feedback_text` | Email content (analyzed for sentiment) |
+| `date` | `date` | Date of the feedback |
+| `Subject` | — | Email subject (kept for reference) |
 
-3. **(Recommended) Create and activate a virtual environment**
+---
 
+## ⚙️ Setup & Installation
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/nithu0035/sentiment-analysis-LLM.git
+cd sentiment-analysis-LLM
+```
+
+### 2. Create a virtual environment (recommended)
 ```bash
 python -m venv venv
+
 # Windows:
 venv\Scripts\activate
+
 # macOS / Linux:
 source venv/bin/activate
 ```
 
-4. **Install dependencies**
-
+### 3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-5. **Configure environment variables**
-
-Copy `.env.example` to `.env` (optional but recommended):
-
+### 4. Configure environment variables
 ```bash
-cp .env.example .env   # On Windows you can manually duplicate the file
+cp .env.example .env
 ```
 
-Ensure `.env` contains:
-
+`.env` should contain:
 ```env
 DATA_PATH=./data/employee_feedback.csv
 OUTPUT_DIR=./outputs
@@ -75,101 +99,58 @@ OUTPUT_DIR=./outputs
 
 ---
 
-## 3. Usage
+## ▶️ Usage
 
-### Option A – Jupyter Notebook (recommended)
-
+### Option A — Jupyter Notebook (recommended)
 ```bash
 jupyter notebook
 ```
 
-Then:
+Open `notebooks/employee_sentiment_analysis.ipynb` and run all cells (`Kernel → Restart & Run All`).
 
-1. In the browser that opens, go into the `notebooks/` folder.
-2. Open `employee_sentiment_analysis.ipynb`.
-3. Run all cells in order (`Kernel` → `Restart & Run All`).
-
-The notebook will:
-
-- Load `employee_feedback.csv`
-- Do EDA on the feedback
-- Compute TextBlob sentiment scores and labels
-- Aggregate sentiment monthly
-- Rank employees
-- Flag high flight-risk employees
-- Fit and plot a linear regression trend
-- Save CSV outputs into the `outputs/` folder.
-
-### Option B – Python Script
-
+### Option B — Python Script
 ```bash
 python src/sentiment_pipeline.py
 ```
 
-The script runs the same pipeline and writes:
-
-- `outputs/feedback_with_sentiment.csv`
-- `outputs/employee_ranking_and_flight_risk.csv`
-- `outputs/monthly_sentiment_trend.csv`
+Both options produce the same 3 output CSVs saved to the `outputs/` folder.
 
 ---
 
-## 4. Dataset Column Mapping
+## 🧠 Methodology
 
-In this project, we map the original CSV columns as:
+**1. Data Cleaning** — Parse dates, drop nulls, rename columns, add text length feature.
 
-- `from`   → `employee_id`
-- `body`   → `feedback_text`
-- `date`   → `date`
-- `Subject` is kept for possible additional analysis but not required for sentiment.
+**2. Sentiment Analysis** — TextBlob polarity score in range [-1, 1] mapped to three labels:
+- `score > 0.05` → **Positive**
+- `score < -0.05` → **Negative**
+- otherwise → **Neutral**
 
----
+**3. Monthly Aggregation** — Group by year-month, compute average sentiment and feedback count, plot time-series.
 
-## 5. Methodology Overview
+**4. Employee Ranking** — Group by employee ID, rank by average sentiment score descending.
 
-1. **Data Cleaning & EDA**
-   - Parse dates and keep only relevant columns.
-   - Add derived features like text length.
-   - Inspect distributions and basic statistics.
+**5. Flight Risk Flag** — Employees with avg sentiment ≤ -0.1 AND ≥ 3 feedback entries are flagged as **High** risk.
 
-2. **Sentiment Analysis**
-   - Use TextBlob to compute a polarity score in the range [-1, 1].
-   - Map polarity to three labels:
-     - `score > 0.05`  → Positive
-     - `score < -0.05` → Negative
-     - otherwise       → Neutral
-
-3. **Monthly Sentiment Scoring**
-   - Group by `year_month` and compute average sentiment and feedback counts.
-   - Plot monthly sentiment as a time-series line chart.
-
-4. **Employee Ranking**
-   - Group by `employee_id` and compute:
-     - Average sentiment
-     - Feedback count
-   - Rank employees by average sentiment.
-
-5. **Flight Risk Identification**
-   - Simple rule-based heuristic:
-     - Average sentiment below a negative threshold
-     - Minimum number of feedback entries
-   - Mark these employees as **High** flight risk; others as **Low**.
-
-6. **Linear Regression Trend**
-   - Encode months as an integer time index.
-   - Fit a scikit-learn `LinearRegression` model on monthly average sentiment.
-   - Use the slope to interpret whether sentiment is improving or declining over time.
+**6. Linear Regression Trend** — Encodes months as integer time index, fits `LinearRegression`, plots actual vs predicted trend line. A positive slope = improving sentiment over time.
 
 ---
 
-## 6. Requirement Checklist (from assignment)
+## 📤 Output Files
 
-- [x] Sentiment labelling (Positive, Negative, Neutral) using TextBlob
-- [x] EDA and visualizations
-- [x] Monthly sentiment scoring
-- [x] Employee ranking
-- [x] Flight risk identification
-- [x] Linear regression model for sentiment trends
-- [x] `README.md` with setup, usage and methodology
-- [x] `.env.example`
-- [x] Dataset file included (`data/employee_feedback.csv`)
+| File | Description |
+|---|---|
+| `feedback_with_sentiment.csv` | All feedback rows with polarity score and label |
+| `employee_ranking_and_flight_risk.csv` | Per-employee avg sentiment, feedback count, rank, and flight risk flag |
+| `monthly_sentiment_trend.csv` | Monthly avg sentiment with linear regression predictions |
+
+---
+
+## 📄 License
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
+## 👤 Author
+
+**Gudipatoju Nitesh**  
+GitHub: [@nithu0035](https://github.com/nithu0035)
